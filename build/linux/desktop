@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=My Product
+Comment=A Larahan application
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/larahan.exe %u
+Terminal=false
+Type=Application
+Icon=larahan.exe
+Categories=Utility;
+StartupWMClass=larahan.exe
+
+ 

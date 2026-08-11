@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "0.1.0"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "0.1.0",
+			"CompanyName": "Larahan",
+			"FileDescription": "PHP local development environment manager",
+			"LegalCopyright": "(c) 2026, Larahan",
+			"ProductName": "Larahan",
+			"Comments": "Larahan desktop application"
+		}
+	}
+}
