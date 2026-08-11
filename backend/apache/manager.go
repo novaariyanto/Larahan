@@ -104,6 +104,10 @@ func (m *Manager) Uninstall() error {
 }
 
 func dirHasApache(path string) bool {
+	return hasHttpd(path) && hasHttpdConf(path)
+}
+
+func hasHttpd(path string) bool {
 	candidates := []string{
 		filepath.Join(path, "bin", "httpd.exe"),
 		filepath.Join(path, "httpd.exe"),
@@ -114,4 +118,9 @@ func dirHasApache(path string) bool {
 		}
 	}
 	return false
+}
+
+func hasHttpdConf(path string) bool {
+	_, err := os.Stat(filepath.Join(path, "conf", "httpd.conf"))
+	return err == nil
 }

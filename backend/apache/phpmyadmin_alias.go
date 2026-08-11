@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
 const phpMyAdminConfRel = `conf/extra/httpd-phpmyadmin.conf`
 
+var reIncludePhpMyAdminLine = regexp.MustCompile(`(?m)^\s*Include\s+conf/extra/httpd-phpmyadmin\.conf\s*$`)
+
 // WritePhpMyAdminAlias creates Apache Alias /phpmyadmin pointing at pmaPath.
 func (m *Manager) WritePhpMyAdminAlias(pmaPath string) error {
 	if !m.IsApacheInstalled() {
-		return fmt.Errorf("Apache belum terinstal")
+		return fmt.Errorf("Apache belum terinstal atau instalasinya tidak lengkap (httpd.conf hilang). Install ulang Apache terlebih dahulu")
 	}
-	if err := Configure(m.root(), m.port()); err != nil {
+	if err := ensurePhpMyAdminInclude(m.root()); err != nil {
 		return err
 	}
 	if err := writePhpMyAdminConf(m.root(), pmaPath); err != nil {
@@ -28,7 +31,7 @@ func (m *Manager) WritePhpMyAdminAlias(pmaPath string) error {
 
 // RemovePhpMyAdminAlias clears the phpMyAdmin Apache alias snippet.
 func (m *Manager) RemovePhpMyAdminAlias() error {
-	if !m.IsApacheInstalled() {
+	if !hasHttpd(m.root()) {
 		return nil
 	}
 	path := filepath.Join(m.root(), filepath.FromSlash(phpMyAdminConfRel))
@@ -38,6 +41,22 @@ func (m *Manager) RemovePhpMyAdminAlias() error {
 		return err
 	}
 	return nil
+}
+
+func ensurePhpMyAdminInclude(apacheRoot string) error {
+	confPath := filepath.Join(apacheRoot, "conf", "httpd.conf")
+	data, err := os.ReadFile(confPath)
+	if err != nil {
+		return fmt.Errorf("Apache tidak lengkap (tidak bisa baca httpd.conf): %w — install ulang Apache", err)
+	}
+	content := string(data)
+	if !reIncludePhpMyAdminLine.MatchString(content) {
+		content = strings.TrimRight(content, "\r\n") + "\nInclude conf/extra/httpd-phpmyadmin.conf\n"
+		if err := os.WriteFile(confPath, []byte(content), 0o644); err != nil {
+			return err
+		}
+	}
+	return os.MkdirAll(filepath.Join(apacheRoot, "conf", "extra"), 0o755)
 }
 
 func writePhpMyAdminConf(apacheRoot, pmaPath string) error {

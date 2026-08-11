@@ -140,11 +140,24 @@ func rewriteInstallPaths(content, rootSlash string) string {
 	return content
 }
 
-// normalizeLayout lifts nested Apache24/ (or similar) into the install root.
+// normalizeLayout lifts nested Apache24/ (or similar) into the install root
+// and merges any missing top-level folders from a nested tree.
 func normalizeLayout(apacheRoot string) error {
-	if dirHasApache(apacheRoot) {
-		return nil
+	if err := liftNestedApache(apacheRoot); err != nil {
+		return err
 	}
+	if !hasHttpd(apacheRoot) {
+		return fmt.Errorf("httpd.exe tidak ditemukan di %s", apacheRoot)
+	}
+	if !hasHttpdConf(apacheRoot) {
+		return fmt.Errorf("Apache tidak lengkap (conf/httpd.conf hilang) di %s — uninstall lalu install ulang Apache", apacheRoot)
+	}
+	return nil
+}
+
+// liftNestedApache merges children from a nested Apache* folder into apacheRoot.
+// Existing names are kept; only missing entries are moved up.
+func liftNestedApache(apacheRoot string) error {
 	entries, err := os.ReadDir(apacheRoot)
 	if err != nil {
 		return err
@@ -154,7 +167,8 @@ func normalizeLayout(apacheRoot string) error {
 			continue
 		}
 		candidate := filepath.Join(apacheRoot, e.Name())
-		if !dirHasApache(candidate) {
+		// Nested tree is usable if it has httpd and/or a real conf tree.
+		if !hasHttpd(candidate) && !hasHttpdConf(candidate) {
 			continue
 		}
 		children, err := os.ReadDir(candidate)
@@ -173,9 +187,6 @@ func normalizeLayout(apacheRoot string) error {
 		}
 		_ = os.Remove(candidate)
 		break
-	}
-	if !dirHasApache(apacheRoot) {
-		return fmt.Errorf("httpd.exe tidak ditemukan di %s", apacheRoot)
 	}
 	return nil
 }

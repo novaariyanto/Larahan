@@ -3,6 +3,7 @@ package installer
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -117,7 +118,7 @@ func (p *Pipeline) Install(ctx context.Context, componentType models.ComponentTy
 	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
 		return err
 	}
-	if err := os.Rename(tmpExtract, dest); err != nil {
+	if err := moveDir(tmpExtract, dest); err != nil {
 		p.emitter.Error(models.InstallErrorEvent{Type: string(componentType), Version: version, Message: err.Error()})
 		return fmt.Errorf("pindahkan hasil extract: %w", err)
 	}
@@ -200,4 +201,68 @@ func (p *Pipeline) fetch(ctx context.Context, spec downloader.PackageSpec) (stri
 		})
 	}
 	return result.LocalPath, nil
+}
+
+// moveDir renames src to dest, falling back to recursive copy on Windows
+// when rename fails (e.g. destination remnants or cross-device links).
+func moveDir(src, dest string) error {
+	if err := os.Rename(src, dest); err == nil {
+		return nil
+	}
+	if err := copyDir(src, dest); err != nil {
+		_ = os.RemoveAll(dest)
+		return err
+	}
+	return os.RemoveAll(src)
+}
+
+func copyDir(src, dest string) error {
+	info, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(dest, info.Mode()); err != nil {
+		return err
+	}
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		from := filepath.Join(src, e.Name())
+		to := filepath.Join(dest, e.Name())
+		if e.IsDir() {
+			if err := copyDir(from, to); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := copyFile(from, to); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func copyFile(src, dest string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	info, err := in.Stat()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dest), 0o755); err != nil {
+		return err
+	}
+	out, err := os.OpenFile(dest, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	return err
 }
