@@ -15,7 +15,7 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 import * as models$0 from "../models/models.js";
 
 /**
- * GetSummary returns current Apache, MySQL, and PHP overview.
+ * GetSummary returns current Apache, MySQL, PHP, and phpMyAdmin overview.
  */
 export function GetSummary(): $CancellablePromise<models$0.DashboardSummary> {
     return $Call.ByID(1792487102);

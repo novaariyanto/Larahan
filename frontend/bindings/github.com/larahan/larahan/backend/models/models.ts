@@ -50,6 +50,7 @@ export enum ComponentType {
     TypeApache = "apache",
     TypePHP = "php",
     TypeMySQL = "mysql",
+    TypePhpMyAdmin = "phpmyadmin",
 };
 
 /**
@@ -60,6 +61,7 @@ export interface DashboardSummary {
     "mysql": ComponentInfo;
     "active_php": string;
     "php": ComponentInfo;
+    "phpmyadmin": ComponentInfo;
 }
 
 /**
@@ -128,6 +130,7 @@ export interface Paths {
     "apache": string;
     "php": string;
     "mysql": string;
+    "phpmyadmin": string;
     "downloads": string;
     "logs": string;
     "config": string;
