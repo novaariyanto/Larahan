@@ -2,6 +2,7 @@ package apache
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -11,7 +12,15 @@ import (
 const httpdImage = "httpd.exe"
 
 func (m *Manager) httpdExe() string {
-	return filepath.Join(m.root(), "bin", "httpd.exe")
+	bin := filepath.Join(m.root(), "bin", "httpd.exe")
+	if _, err := os.Stat(bin); err == nil {
+		return bin
+	}
+	return filepath.Join(m.root(), "httpd.exe")
+}
+
+func (m *Manager) httpdWorkDir() string {
+	return filepath.Dir(m.httpdExe())
 }
 
 func (m *Manager) root() string {
@@ -43,7 +52,7 @@ func (m *Manager) Start() error {
 	}
 
 	if out, err := m.run("-k", "start"); err != nil {
-		if err2 := process.StartDetached(m.httpdExe(), []string{"-d", m.root()}, filepath.Join(m.root(), "bin")); err2 != nil {
+		if err2 := process.StartDetached(m.httpdExe(), []string{"-d", m.root()}, m.httpdWorkDir(), m.phpPath); err2 != nil {
 			return fmt.Errorf("gagal start Apache: %v / %v (%s)", err, err2, out)
 		}
 	}
@@ -110,7 +119,7 @@ func (m *Manager) port() int {
 
 func (m *Manager) run(args ...string) (string, error) {
 	full := append([]string{"-d", m.root()}, args...)
-	return process.RunCapture(m.httpdExe(), full, filepath.Join(m.root(), "bin"))
+	return process.RunCapture(m.httpdExe(), full, m.httpdWorkDir(), m.phpPath)
 }
 
 func runHttpd(exe string, args ...string) (string, error) {

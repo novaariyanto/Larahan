@@ -29,7 +29,7 @@ function go(path: string) {
       <h1 class="mt-1 font-display text-2xl font-semibold tracking-tight text-white">Larahan</h1>
     </div>
 
-    <nav class="flex flex-1 flex-col gap-1 p-3">
+    <nav class="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
       <button
         v-for="item in items"
         :key="item.path"

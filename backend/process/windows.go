@@ -18,11 +18,13 @@ func IsRunning(imageName string) bool {
 }
 
 // StartDetached starts a process without attaching a console window.
-func StartDetached(exe string, args []string, workDir string) error {
+// extraPath directories are prepended to PATH for the child (PHP cURL/OpenSSL DLLs).
+func StartDetached(exe string, args []string, workDir string, extraPath ...string) error {
 	cmd := exec.Command(exe, args...)
 	if workDir != "" {
 		cmd.Dir = workDir
 	}
+	applyExtraPath(cmd, extraPath...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		CreationFlags: 0x08000000, // CREATE_NO_WINDOW
 		HideWindow:    true,
@@ -33,11 +35,12 @@ func StartDetached(exe string, args []string, workDir string) error {
 }
 
 // RunCapture runs a command and returns combined stdout/stderr.
-func RunCapture(exe string, args []string, workDir string) (string, error) {
+func RunCapture(exe string, args []string, workDir string, extraPath ...string) (string, error) {
 	cmd := exec.Command(exe, args...)
 	if workDir != "" {
 		cmd.Dir = workDir
 	}
+	applyExtraPath(cmd, extraPath...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		CreationFlags: 0x08000000,
 		HideWindow:    true,
@@ -47,6 +50,37 @@ func RunCapture(exe string, args []string, workDir string) (string, error) {
 	cmd.Stderr = &buf
 	err := cmd.Run()
 	return strings.TrimSpace(buf.String()), err
+}
+
+func applyExtraPath(cmd *exec.Cmd, extraDirs ...string) {
+	var extras []string
+	for _, d := range extraDirs {
+		d = strings.TrimSpace(d)
+		if d != "" {
+			extras = append(extras, d)
+		}
+	}
+	if len(extras) == 0 {
+		return
+	}
+	prefix := strings.Join(extras, string(os.PathListSeparator)) + string(os.PathListSeparator)
+	env := os.Environ()
+	found := false
+	for i, e := range env {
+		eq := strings.IndexByte(e, '=')
+		if eq <= 0 {
+			continue
+		}
+		if strings.EqualFold(e[:eq], "PATH") {
+			env[i] = e[:eq+1] + prefix + e[eq+1:]
+			found = true
+			break
+		}
+	}
+	if !found {
+		env = append(env, "PATH="+prefix+os.Getenv("PATH"))
+	}
+	cmd.Env = env
 }
 
 // StopImage kills all processes matching imageName.

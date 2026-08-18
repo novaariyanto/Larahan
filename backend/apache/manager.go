@@ -23,6 +23,7 @@ type Manager struct {
 	store       *storage.Store
 	settings    *config.Manager
 	beforeStart func() error
+	phpPath     string
 	mu          sync.Mutex
 	busy        bool
 }
