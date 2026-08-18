@@ -3,6 +3,7 @@
 
 import * as ApacheService from "./apacheservice.js";
 import * as DashboardService from "./dashboardservice.js";
+import * as LibraryService from "./libraryservice.js";
 import * as MySQLService from "./mysqlservice.js";
 import * as PHPService from "./phpservice.js";
 import * as PhpMyAdminService from "./phpmyadminservice.js";
@@ -10,6 +11,7 @@ import * as SettingsService from "./settingsservice.js";
 export {
     ApacheService,
     DashboardService,
+    LibraryService,
     MySQLService,
     PHPService,
     PhpMyAdminService,

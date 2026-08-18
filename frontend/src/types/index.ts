@@ -56,6 +56,28 @@ export interface AppInfo {
   description: string
 }
 
+export type ExtensionStatus = 'enabled' | 'disabled' | 'not_installed'
+
+export interface PHPExtension {
+  name: string
+  display_name: string
+  status: ExtensionStatus
+  version: string
+  dll: string
+  builtin: boolean
+  zend: boolean
+  toggleable: boolean
+}
+
+export interface LibrarySummary {
+  installed: boolean
+  php_version: string
+  php_path: string
+  apache_running: boolean
+  message: string
+  extensions: PHPExtension[]
+}
+
 export function statusLabel(status: ComponentStatus): string {
   switch (status) {
     case 'running':

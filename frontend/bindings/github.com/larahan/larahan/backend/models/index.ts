@@ -4,6 +4,7 @@
 export {
     ComponentStatus,
     ComponentType,
+    ExtensionStatus,
     InstallStage
 } from "./models.js";
 
@@ -14,6 +15,8 @@ export type {
     DownloadProgress,
     InstallErrorEvent,
     InstallStageEvent,
+    LibrarySummary,
+    PHPExtension,
     PHPVersionInfo,
     Paths,
     Result,

@@ -78,6 +78,20 @@ export interface DownloadProgress {
 }
 
 /**
+ * ExtensionStatus is the install/enable state of a PHP library.
+ */
+export enum ExtensionStatus {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero = "",
+
+    ExtEnabled = "enabled",
+    ExtDisabled = "disabled",
+    ExtNotInstalled = "not_installed",
+};
+
+/**
  * InstallErrorEvent is emitted when the install pipeline fails.
  */
 export interface InstallErrorEvent {
@@ -110,6 +124,32 @@ export interface InstallStageEvent {
     "version": string;
     "stage": InstallStage;
     "message": string;
+}
+
+/**
+ * LibrarySummary is the Library module payload.
+ */
+export interface LibrarySummary {
+    "installed": boolean;
+    "php_version": string;
+    "php_path": string;
+    "apache_running": boolean;
+    "message": string;
+    "extensions": PHPExtension[] | null;
+}
+
+/**
+ * PHPExtension describes one PHP library/extension.
+ */
+export interface PHPExtension {
+    "name": string;
+    "display_name": string;
+    "status": ExtensionStatus;
+    "version": string;
+    "dll": string;
+    "builtin": boolean;
+    "zend": boolean;
+    "toggleable": boolean;
 }
 
 /**

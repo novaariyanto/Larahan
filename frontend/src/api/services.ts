@@ -1,6 +1,7 @@
 export {
   ApacheService,
   DashboardService,
+  LibraryService,
   MySQLService,
   PHPService,
   PhpMyAdminService,

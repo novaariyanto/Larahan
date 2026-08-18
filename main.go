@@ -86,6 +86,7 @@ func main() {
 			application.NewService(services.NewDashboardService(apacheMgr, phpMgr, mysqlMgr, pmaMgr)),
 			application.NewService(services.NewApacheService(apacheMgr)),
 			application.NewService(services.NewPHPService(phpMgr)),
+			application.NewService(services.NewLibraryService(phpMgr)),
 			application.NewService(services.NewMySQLService(mysqlMgr)),
 			application.NewService(services.NewPhpMyAdminService(pmaMgr)),
 			application.NewService(services.NewSettingsService(settingsMgr, store, apacheMgr, mysqlMgr, pmaMgr)),

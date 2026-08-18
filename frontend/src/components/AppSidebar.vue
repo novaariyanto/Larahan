@@ -9,6 +9,7 @@ const items = [
   { name: 'Dashboard', path: '/', icon: 'dashboard' },
   { name: 'Apache', path: '/apache', icon: 'apache' },
   { name: 'PHP', path: '/php', icon: 'php' },
+  { name: 'Library', path: '/library', icon: 'library' },
   { name: 'MySQL', path: '/mysql', icon: 'mysql' },
   { name: 'phpMyAdmin', path: '/phpmyadmin', icon: 'phpmyadmin' },
   { name: 'Settings', path: '/settings', icon: 'settings' },

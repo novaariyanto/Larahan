@@ -85,3 +85,34 @@ func OKResult(message string) Result {
 func FailResult(message string) Result {
 	return Result{OK: false, Message: message}
 }
+
+// ExtensionStatus is the install/enable state of a PHP library.
+type ExtensionStatus string
+
+const (
+	ExtEnabled      ExtensionStatus = "enabled"
+	ExtDisabled     ExtensionStatus = "disabled"
+	ExtNotInstalled ExtensionStatus = "not_installed"
+)
+
+// PHPExtension describes one PHP library/extension.
+type PHPExtension struct {
+	Name        string           `json:"name"`
+	DisplayName string           `json:"display_name"`
+	Status      ExtensionStatus  `json:"status"`
+	Version     string           `json:"version"`
+	DLL         string           `json:"dll"`
+	Builtin     bool             `json:"builtin"`
+	Zend        bool             `json:"zend"`
+	Toggleable  bool             `json:"toggleable"`
+}
+
+// LibrarySummary is the Library module payload.
+type LibrarySummary struct {
+	Installed     bool           `json:"installed"`
+	PHPVersion    string         `json:"php_version"`
+	PHPPath       string         `json:"php_path"`
+	ApacheRunning bool           `json:"apache_running"`
+	Message       string         `json:"message"`
+	Extensions    []PHPExtension `json:"extensions"`
+}
